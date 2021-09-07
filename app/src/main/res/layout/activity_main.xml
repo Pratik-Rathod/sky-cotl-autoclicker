@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDarkBackground"
+    android:orientation="vertical"
+    android:paddingTop="10dp"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:clickable="false"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical"
+            android:paddingStart="25dp"
+            android:padding="14dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sky Musician"
+                android:textColor="@color/TextPrimary"
+                android:textSize="19sp" />
+
+            <TextView
+                android:id="@+id/checkFlag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Disabled"
+                android:textColor="@color/TextSecondary"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <Switch
+            android:onClick="checkSwitch"
+            android:id="@+id/switchCheck"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:checked="false"
+            android:gravity="end" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_gravity="center"
+        android:layout_height="1dp"
+        android:background="#1C1C1C"/>
+
+    <LinearLayout
+        android:onClick="openAccessibility"
+        android:paddingStart="25dp"
+        android:padding="14dp"
+        android:clickable="false"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/msg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/requestAccString"
+                android:textColor="@color/TextSecondary"
+                android:textSize="13dp" />
+    </LinearLayout>
+</LinearLayout>

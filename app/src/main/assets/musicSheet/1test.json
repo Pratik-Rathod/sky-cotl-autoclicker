@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Example_Canon.C",
+    "author": "",
+    "arrangedBy": "",
+    "transcribedBy": "",
+    "permission": "",
+    "bpm": 120,
+    "bitsPerPage": 16,
+    "pitchLevel": 0,
+    "songNotes": [
+      {
+        "time": 2992,
+        "key": "2Key0"
+      },
+      {
+        "time": 2992,
+        "key": "2Key1"
+      },
+      {
+        "time": 2992,
+        "key": "1Key2"
+      },
+      {
+        "time": 3366,
+        "key": "1Key3"
+      },
+      {
+        "time": 3553,
+        "key": "1Key4"
+      },
+      {
+        "time": 3740,
+        "key": "1Key5"
+      },
+      {
+        "time": 4114,
+        "key": "1Key6"
+      },
+      {
+        "time": 4301,
+        "key": "1Key7"
+      },
+      {
+        "time": 4488,
+        "key": "2Key8"
+      },
+      {
+        "time": 4488,
+        "key": "2Key9"
+      },
+      {
+        "time": 4488,
+        "key": "1Key10"
+      },
+      {
+        "time": 4675,
+        "key": "1Key11"
+      },
+      {
+        "time": 4862,
+        "key": "1Key12"
+      },
+      {
+        "time": 5049,
+        "key": "1Key13"
+      },
+      {
+        "time": 5236,
+        "key": "1Key14"
+      }
+    ]
+  }
+]

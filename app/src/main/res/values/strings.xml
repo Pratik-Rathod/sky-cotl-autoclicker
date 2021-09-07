@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">sky</string>
+    <string name="play">play</string>
+    <string name="add">Add</string>
+    <string name="requestAccString">Please activate sky accessibility service.</string>
+    <string name="requestTurnString">All Done ! turn on above switch to enjoy.</string>
+    <string name="QuickTileLabel">Sky Player</string>
+</resources>
