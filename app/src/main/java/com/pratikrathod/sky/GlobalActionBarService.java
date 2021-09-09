@@ -44,7 +44,7 @@ public class GlobalActionBarService extends AccessibilityService {
     //static int Global_I
     static volatile int pause_var = 0;
     static volatile boolean stop = true;
-    static GestureDescription[] keyChords;
+    private GestureDescription[] keyChords;
     private JSONArray musicSheetArray = null;
     private JSONObject keys = null;
     private int keyIndex = 0;
@@ -54,13 +54,12 @@ public class GlobalActionBarService extends AccessibilityService {
     private final Pattern p = compile("[0-9]+$");
     private Matcher m = null;
     private String s = null;
-    int findGap = 0;
-    Runnable mRunnable = null;
+    private int findGap = 0;
     String musicSheetSelected = "1test.json";
     static int TILE_STATE = 1;
-    static WindowManager wm;
-    static WindowManager.LayoutParams lp;
-    static boolean isPlaying = false;
+    protected static WindowManager wm;
+    protected static WindowManager.LayoutParams[] lp;
+    private static boolean isPlaying = false;
     //Image button objects
     private ImageButton playButton;
     private ImageButton selectTrack;
@@ -75,41 +74,47 @@ public class GlobalActionBarService extends AccessibilityService {
     protected void onServiceConnected() {
 
         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
-        lp = new WindowManager.LayoutParams();
         serviceIntent = new Intent(getApplicationContext(), CustomPointWidget.class);
 
-        // Create an overlay and display the action bar
         mLayout = new FrameLayout(this);
-        lp.type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-        lp.format = PixelFormat.TRANSLUCENT;
-        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        lp.gravity = Gravity.START;
-        LayoutInflater inflater = LayoutInflater.from(this);
-        inflater.inflate(R.layout.action_bar, mLayout);
+
+        lp = setLayoutParams();
+
+        lp[0].gravity = Gravity.START;
+        lp[0].flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        LayoutInflater.from(this).inflate(R.layout.action_bar, mLayout);
 
         playButton = mLayout.findViewById(R.id.play);
         customSettings = mLayout.findViewById(R.id.custom_settings);
         selectTrack = mLayout.findViewById(R.id.select_track);
 
-        //check
+        //configuring all buttons
         configurePlayButton();
         configureSelectTrackButton();
         configureSettings();
+    }
 
+    private WindowManager.LayoutParams []setLayoutParams() {
+        WindowManager.LayoutParams[] layoutParams = new WindowManager.LayoutParams[3];
+        for (int i = 0; i < 3; i++) {
+            layoutParams[i] = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT);
+        }
+        return layoutParams;
     }
 
     static int viewToggle() {
-
         ImageButton playButton = mLayout.findViewById(R.id.play);
         ImageButton customSettings = mLayout.findViewById(R.id.custom_settings);
         ImageButton selectTrack = mLayout.findViewById(R.id.select_track);
-
         try {
             assert wm != null;
             if (mLayout.getWindowToken() == null) {
-                wm.addView(mLayout, lp);
+                wm.addView(mLayout, lp[0]);
                 Log.d("debug", "ViewAdded");
                 TILE_STATE = 2;
             } else {
@@ -232,6 +237,7 @@ public class GlobalActionBarService extends AccessibilityService {
         });
 
     }
+
     private void configureSettings() {
 
         customSettings.setOnClickListener(new View.OnClickListener() {
@@ -259,7 +265,6 @@ public class GlobalActionBarService extends AccessibilityService {
         }
     }
 
-
     private void playMusic() {
         try {
             //JSON Objects % arrays
@@ -274,7 +279,7 @@ public class GlobalActionBarService extends AccessibilityService {
             final int[] currentMusicTime = new int[1];
             playButton = mLayout.findViewById(R.id.play);
 
-            mRunnable = new Runnable() {
+            Runnable mRunnable = new Runnable() {
                 @SuppressWarnings("BusyWait")
                 @Override
                 public void run() {
@@ -291,7 +296,6 @@ public class GlobalActionBarService extends AccessibilityService {
                                 nextMusicTime[0] = musicSheetArray.getJSONObject(i + 1).getInt("time");
                                 currentMusicTime[0] = keys.getInt("time");
                                 findGap = nextMusicTime[0] - currentMusicTime[0];
-
                             }
 
                             m = p.matcher(keyIndexString);
@@ -349,7 +353,7 @@ public class GlobalActionBarService extends AccessibilityService {
 
     //Map Coordinates into keyChords & build the gesture
     private GestureDescription[] buildGestureKeyChords() {
-    
+
         int i;
         //Default Duration for keyStroke is 100 ms
         final long DURATION = 100;

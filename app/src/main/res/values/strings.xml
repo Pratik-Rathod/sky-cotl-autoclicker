@@ -5,4 +5,5 @@
     <string name="requestAccString">Please activate sky accessibility service.</string>
     <string name="requestTurnString">All Done ! turn on above switch to enjoy.</string>
     <string name="QuickTileLabel">Sky Player</string>
+    <string name="contentDescription">Accessibility buttons</string>
 </resources>

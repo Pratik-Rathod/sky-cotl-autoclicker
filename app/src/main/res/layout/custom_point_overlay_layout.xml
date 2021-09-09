@@ -1,21 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/frame_root_layout"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-    <!--Root container-->
-    <RelativeLayout
-        android:id="@+id/root_layout"
-        android:layout_width="wrap_content"
-        android:background="@color/buttonBackground"
-        android:layout_height="wrap_content">
-            <RelativeLayout
-                android:id="@+id/select_point"
-                android:layout_margin="4dp"
-                android:foregroundTint="@color/buttonColor"
-                android:layout_width="40dp"
-                android:foreground="@drawable/ic_twotone_circle_24"
-                android:layout_height="40dp">
-            </RelativeLayout>
-    </RelativeLayout>
-</FrameLayout>
+    android:layout_height="wrap_content"
+    android:background="@color/buttonBackground"
+    tools:ignore="UselessParent">
+
+    <View
+        android:id="@+id/select_point"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="4dp"
+        android:foreground="@drawable/ic_two_tone_circle_24"
+        android:foregroundTint="@color/buttonColor" />
+</RelativeLayout>
