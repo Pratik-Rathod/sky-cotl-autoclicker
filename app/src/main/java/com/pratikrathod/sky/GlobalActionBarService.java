@@ -59,7 +59,6 @@ public class GlobalActionBarService extends AccessibilityService {
     static int TILE_STATE = 1;
     protected static WindowManager wm;
     protected static WindowManager.LayoutParams[] lp;
-    private static boolean isPlaying = false;
     //Image button objects
     private ImageButton playButton;
     private ImageButton selectTrack;
@@ -67,7 +66,6 @@ public class GlobalActionBarService extends AccessibilityService {
     //CustomPointWidget
     private final PreferencesPointUtil pointUtil = new PreferencesPointUtil();
     private Intent serviceIntent;
-    int pointNo = 0;
     private static Future<?> f = null;
 
     @Override
@@ -94,7 +92,7 @@ public class GlobalActionBarService extends AccessibilityService {
         configureSettings();
     }
 
-    private WindowManager.LayoutParams []setLayoutParams() {
+    private WindowManager.LayoutParams[] setLayoutParams() {
         WindowManager.LayoutParams[] layoutParams = new WindowManager.LayoutParams[3];
         for (int i = 0; i < 3; i++) {
             layoutParams[i] = new WindowManager.LayoutParams(
@@ -119,7 +117,6 @@ public class GlobalActionBarService extends AccessibilityService {
                 TILE_STATE = 2;
             } else {
                 stop = true;
-                isPlaying = false;
                 pause_var = 0;
 
                 playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
@@ -153,19 +150,12 @@ public class GlobalActionBarService extends AccessibilityService {
                 @Override
                 public void onClick(View view) {
                     if (CustomPointWidget.isServiceRunning) {
-                        if (pointNo == 0) {
-                            pointUtil.savePref(pointNo, getApplicationContext());
-                            pointNo++;
-                            Toast.makeText(getApplicationContext(), "Now please select 2nd point", Toast.LENGTH_SHORT).show();
-                        } else {
-                            pointUtil.savePref(pointNo, getApplicationContext());
-                            pointNo = 0;
-                            Toast.makeText(getApplicationContext(), "Both point selected ! ", Toast.LENGTH_SHORT).show();
-                            toggleCustomService();
-                            keyChords = buildGestureKeyChords();
-                        }
+                        pointUtil.savePref(getApplicationContext());
+                        toggleCustomService();
+                        keyChords = buildGestureKeyChords();
+                        Toast.makeText(getApplicationContext(), "Done", Toast.LENGTH_SHORT).show();
                     } else {
-                        if (!isPlaying) {
+                        if (stop) {
                             playButton.setImageResource(R.drawable.ic_baseline_pause_24);
                             stop = false;
                             if (f != null)
@@ -179,7 +169,6 @@ public class GlobalActionBarService extends AccessibilityService {
                             stop = true;
                             playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
                         }
-                        isPlaying = !isPlaying;
                     }
                 }
             });
@@ -232,7 +221,7 @@ public class GlobalActionBarService extends AccessibilityService {
                     pause_var = 0;
                     alert.show();
                 } else
-                    Toast.makeText(getApplicationContext(), "Your Song is playing", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Can't select music sheet while playing", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -243,7 +232,7 @@ public class GlobalActionBarService extends AccessibilityService {
         customSettings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggleCustomService();
+              if(stop)toggleCustomService();
             }
         });
     }
@@ -252,9 +241,8 @@ public class GlobalActionBarService extends AccessibilityService {
     private void toggleCustomService() {
 
         if (!CustomPointWidget.isServiceRunning) {
-            playButton.setImageResource(R.drawable.ic_twotone_add_circle_24);
+            playButton.setImageResource(R.drawable.ic_round_done_all_24);
             customSettings.setImageResource(R.drawable.ic_baseline_close_24);
-            Toast.makeText(getApplicationContext(), "Please select initial point()", Toast.LENGTH_SHORT).show();
             selectTrack.setEnabled(false);
             this.startService(serviceIntent);
         } else {
@@ -315,7 +303,8 @@ public class GlobalActionBarService extends AccessibilityService {
                                 }
                             } else {
                                 playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
-                                isPlaying = false;
+                                stop = true;
+                                pause_var = 0;
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -360,23 +349,21 @@ public class GlobalActionBarService extends AccessibilityService {
         int[] xCordsArr = pointUtil.readPrefPoint(getApplicationContext());
 
         //Final Coordinates for Piano lol
-        int[] xCords = {672, 875, 1175, 1416, 1661};
-        int[] yCords = {219, 453, 661};
+        float[] xCords = {672, 875, 1175, 1416, 1661};
+        float[] yCords = {219, 453, 661};
 
         int diffXYCords = xCordsArr[2] - xCordsArr[0];
 
-        if (diffXYCords > 20) {
-            xCords[0] = xCordsArr[0] + 100;
-            yCords[0] = xCordsArr[1] + 100;
+        xCords[0] = xCordsArr[0] + 100;
+        yCords[0] = xCordsArr[1] + 100;
 
-            xCords[1] = xCords[0] + diffXYCords;
-            xCords[2] = xCords[1] + diffXYCords;
-            xCords[3] = xCords[2] + diffXYCords;
-            xCords[4] = xCords[3] + diffXYCords;
+        xCords[1] = xCords[0] + diffXYCords;
+        xCords[2] = xCords[1] + diffXYCords;
+        xCords[3] = xCords[2] + diffXYCords;
+        xCords[4] = xCords[3] + diffXYCords;
 
-            yCords[1] = yCords[0] + diffXYCords;
-            yCords[2] = yCords[1] + diffXYCords;
-        }
+        yCords[1] = yCords[0] + diffXYCords;
+        yCords[2] = yCords[1] + diffXYCords;
 
         Log.d("sky", "buildGestureKeyChords:" + xCords[0] + " " + xCords[1] + " " + xCords[2] + " " + xCords[3] + " " + xCords[4]);
 
@@ -404,11 +391,8 @@ public class GlobalActionBarService extends AccessibilityService {
     }
 
     @Override
-    public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
-    }
-
+    public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {}
     @Override
-    public void onInterrupt() {
-    }
+    public void onInterrupt() {}
 
 }

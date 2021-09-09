@@ -10,86 +10,83 @@ import android.widget.FrameLayout;
 
 public class CustomPointWidget extends GlobalActionBarService {
 
-    private View floatingView;
+    private final View []floatingView = new View[3];
     final String TAG = "DEBUG";
 
     static boolean isServiceRunning = false;
 
-    static int xPoint = 672, yPoint = 219;
+    static int[] xPoint,yPoint ;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onCreate() {
         super.onCreate();
         isServiceRunning = true;
-
-        floatingView = LayoutInflater.from(this).inflate(R.layout.custom_point_overlay_layout, new FrameLayout(this));
-
+        xPoint = new int[2];
+        yPoint = new int[2];
         PreferencesPointUtil pointUtil = new PreferencesPointUtil();
-
         //Specify the view position
-        lp[1].gravity = Gravity.TOP | Gravity.START;
-        lp[1].x = pointUtil.readPrefPoint(getApplicationContext())[0];
-        lp[1].y = pointUtil.readPrefPoint(getApplicationContext())[1];
+        for(int i =0; i<2;i++){
+            floatingView[i]= LayoutInflater.from(this).inflate(R.layout.custom_point_overlay_layout, new FrameLayout(this));
+            lp[i+1].gravity = Gravity.TOP | Gravity.START;
+            lp[i+1].x = pointUtil.readPrefPoint(getApplicationContext())[0];
+            lp[i+1].y = pointUtil.readPrefPoint(getApplicationContext())[1];
+        }
+
+        lp[2].x = pointUtil.readPrefPoint(getApplicationContext())[2];
 
         assert wm != null;
-        wm.addView(floatingView, lp[1]);
 
-        floatingView.findViewById(R.id.root_layout).setOnTouchListener(new View.OnTouchListener() {
-            private int initialX;
-            private int initialY;
-            private float initialTouchX;
-            private float initialTouchY;
+        for(int i =0; i<2;i++) {
+            wm.addView(floatingView[i], lp[i+1]);
+            final int finalI = i;
+            floatingView[i].findViewById(R.id.root_layout).setOnTouchListener(new View.OnTouchListener() {
+                private int initialX;
+                private int initialY;
+                private float initialTouchX;
+                private float initialTouchY;
 
-
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-
-                        //remember the initial position.
-                        initialX = lp[1].x;
-                        initialY = lp[1].y;
-
-                        //get the touch location
-                        initialTouchX = event.getRawX();
-                        initialTouchY = event.getRawY();
-                        Log.d("POINT", "onTouch: X" + initialTouchX + " Y" + initialTouchY);
-                        return true;
-                    case MotionEvent.ACTION_UP:
-
-                        int XDiff = (int) (event.getRawX() - initialTouchX);
-                        int YDiff = (int) (event.getRawY() - initialTouchY);
-
-                        if (XDiff < 10 && YDiff < 10) {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            //remember the initial position.
+                            initialX = lp[finalI +1].x;
+                            initialY = lp[finalI +1].y;
+                            //get the touch location
+                            initialTouchX = event.getRawX();
+                            initialTouchY = event.getRawY();
                             Log.d("POINT", "onTouch: X" + initialTouchX + " Y" + initialTouchY);
-                        }
-                        return true;
-                    case MotionEvent.ACTION_MOVE:
+                            return true;
 
-                        //Calculate the X and Y coordinates of the view.
-                        lp[1].x = initialX + (int) (event.getRawX() - initialTouchX);
-                        lp[1].y = initialY + (int) (event.getRawY() - initialTouchY);
+                        case MotionEvent.ACTION_MOVE:
+                            //Calculate the X and Y coordinates of the view.
+                            lp[finalI +1].x = initialX + (int) (event.getRawX() - initialTouchX);
+                            lp[finalI +1].y = initialY + (int) (event.getRawY() - initialTouchY);
 
-                        xPoint = lp[1].x;
-                        yPoint = lp[1].y;
-                        Log.d(TAG, "onTouch: x" + xPoint + " y:" + yPoint);
-
-                        //Update the layout with new X & Y coordinate
-                        wm.updateViewLayout(floatingView, lp[1]);
-                        return true;
+                            xPoint[finalI] = lp[finalI +1].x;
+                            yPoint[finalI] = lp[finalI +1].y;
+                            Log.d(TAG, "onTouch:["+finalI+"] x" + xPoint[finalI] + " y:" + yPoint[finalI]);
+                            //Update the layout with new X & Y coordinate
+                            wm.updateViewLayout(floatingView[finalI], lp[finalI +1]);
+                            return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+            });
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (floatingView != null) {
-            wm.removeView(floatingView);
-            isServiceRunning = false;
+        int i = 0;
+        while(i < 2){
+            if (floatingView[i] != null) {
+                wm.removeView(floatingView[i]);
+                isServiceRunning = false;
+            }
+            i++;
         }
     }
 }
