@@ -25,15 +25,16 @@ public class CustomPointWidget extends GlobalActionBarService {
         xPoint = new int[2];
         yPoint = new int[2];
         PreferencesPointUtil pointUtil = new PreferencesPointUtil();
+        int[] pointXY = pointUtil.readPrefPoint(getApplicationContext());
         //Specify the view position
         for(int i =0; i<2;i++){
             floatingView[i]= LayoutInflater.from(this).inflate(R.layout.custom_point_overlay_layout, new FrameLayout(this));
             lp[i+1].gravity = Gravity.TOP | Gravity.START;
-            lp[i+1].x = pointUtil.readPrefPoint(getApplicationContext())[0];
-            lp[i+1].y = pointUtil.readPrefPoint(getApplicationContext())[1];
+            lp[i+1].x = pointXY[0];
+            lp[i+1].y = pointXY[1];
         }
 
-        lp[2].x = pointUtil.readPrefPoint(getApplicationContext())[2];
+        lp[2].x = pointXY[2];
 
         assert wm != null;
 
@@ -66,6 +67,7 @@ public class CustomPointWidget extends GlobalActionBarService {
 
                             xPoint[finalI] = lp[finalI +1].x;
                             yPoint[finalI] = lp[finalI +1].y;
+
                             Log.d(TAG, "onTouch:["+finalI+"] x" + xPoint[finalI] + " y:" + yPoint[finalI]);
                             //Update the layout with new X & Y coordinate
                             wm.updateViewLayout(floatingView[finalI], lp[finalI +1]);
