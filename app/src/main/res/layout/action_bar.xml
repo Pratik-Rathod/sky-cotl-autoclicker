@@ -38,5 +38,25 @@
             android:src="@drawable/ic_baseline_settings_24"
             android:contentDescription="@string/contentDescription"
             app:tint="@color/buttonColor" />
+
+        <ImageButton
+            android:id="@+id/close_view"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:foregroundTint="@color/buttonColor"
+            android:backgroundTint="@color/buttonBackground"
+            android:src="@drawable/ic_baseline_close_24"
+            android:contentDescription="@string/contentDescription"
+            app:tint="@color/buttonColor" />
+
+        <ImageButton
+            android:id="@+id/expand_view"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:foregroundTint="@color/buttonColor"
+            android:backgroundTint="@color/buttonBackground"
+            android:src="@drawable/ic_baseline_expand_24"
+            android:contentDescription="@string/contentDescription"
+            app:tint="@color/buttonColor" />
     </LinearLayout>
 </ScrollView>

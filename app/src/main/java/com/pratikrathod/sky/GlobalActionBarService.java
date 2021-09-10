@@ -44,6 +44,7 @@ public class GlobalActionBarService extends AccessibilityService {
     //static int Global_I
     static volatile int pause_var = 0;
     static volatile boolean stop = true;
+    private static boolean expand = true;
     private GestureDescription[] keyChords;
     private JSONArray musicSheetArray = null;
     private JSONObject keys = null;
@@ -63,6 +64,8 @@ public class GlobalActionBarService extends AccessibilityService {
     private ImageButton playButton;
     private ImageButton selectTrack;
     private ImageButton customSettings;
+    private ImageButton closeBtn;
+    private ImageButton expandBtn;
     //CustomPointWidget
     private final PreferencesPointUtil pointUtil = new PreferencesPointUtil();
     private Intent serviceIntent;
@@ -70,12 +73,9 @@ public class GlobalActionBarService extends AccessibilityService {
 
     @Override
     protected void onServiceConnected() {
-
         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
         serviceIntent = new Intent(getApplicationContext(), CustomPointWidget.class);
-
         mLayout = new FrameLayout(this);
-
         lp = setLayoutParams();
 
         lp[0].gravity = Gravity.START;
@@ -85,11 +85,36 @@ public class GlobalActionBarService extends AccessibilityService {
         playButton = mLayout.findViewById(R.id.play);
         customSettings = mLayout.findViewById(R.id.custom_settings);
         selectTrack = mLayout.findViewById(R.id.select_track);
-
+        closeBtn = mLayout.findViewById(R.id.close_view);
+        expandBtn = mLayout.findViewById(R.id.expand_view);
+        closeBtn.setVisibility(View.GONE);
+        customSettings.setVisibility(View.GONE);
         //configuring all buttons
         configurePlayButton();
         configureSelectTrackButton();
         configureSettings();
+        configureClose();
+        configureExpand();
+    }
+
+    private void configureExpand(){
+            expandBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(expand){
+                        closeBtn.setVisibility(View.VISIBLE);
+                        customSettings.setVisibility(View.VISIBLE);
+                        expandBtn.setImageResource(R.drawable.ic_baseline_collapse_24);
+                        expand = false;
+                    }
+                    else{
+                        closeBtn.setVisibility(View.GONE);
+                        customSettings.setVisibility(View.GONE);
+                        expandBtn.setImageResource(R.drawable.ic_baseline_expand_24);
+                        expand = true;
+                    }
+                }
+            });
     }
 
     private WindowManager.LayoutParams[] setLayoutParams() {
@@ -109,6 +134,8 @@ public class GlobalActionBarService extends AccessibilityService {
         ImageButton playButton = mLayout.findViewById(R.id.play);
         ImageButton customSettings = mLayout.findViewById(R.id.custom_settings);
         ImageButton selectTrack = mLayout.findViewById(R.id.select_track);
+        ImageButton closeBtn = mLayout.findViewById(R.id.close_view);
+        ImageButton expandBtn = mLayout.findViewById(R.id.expand_view);
         try {
             assert wm != null;
             if (mLayout.getWindowToken() == null) {
@@ -121,8 +148,11 @@ public class GlobalActionBarService extends AccessibilityService {
 
                 playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
                 customSettings.setImageResource(R.drawable.ic_baseline_settings_24);
+                expandBtn.setImageResource(R.drawable.ic_baseline_expand_24);
                 selectTrack.setEnabled(true);
-
+                closeBtn.setVisibility(View.GONE);
+                customSettings.setVisibility(View.GONE);
+                expand = true;
                 wm.removeView(mLayout);
                 Log.d("debug", "ViewRemoved");
                 TILE_STATE = 1;
@@ -134,9 +164,7 @@ public class GlobalActionBarService extends AccessibilityService {
     }
 
     private void configurePlayButton() {
-
         keyChords = buildGestureKeyChords();
-
         try {
             playButton.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -237,22 +265,32 @@ public class GlobalActionBarService extends AccessibilityService {
         });
     }
 
-
     private void toggleCustomService() {
-
         if (!CustomPointWidget.isServiceRunning) {
             playButton.setImageResource(R.drawable.ic_round_done_all_24);
             customSettings.setImageResource(R.drawable.ic_baseline_close_24);
+            closeBtn.setVisibility(View.GONE);
+            expandBtn.setVisibility(View.GONE);
             selectTrack.setEnabled(false);
             this.startService(serviceIntent);
         } else {
             this.stopService(serviceIntent);
+            closeBtn.setVisibility(View.VISIBLE);
+            expandBtn.setVisibility(View.VISIBLE);
             playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
             customSettings.setImageResource(R.drawable.ic_baseline_settings_24);
             selectTrack.setEnabled(true);
         }
     }
 
+    private void configureClose(){
+        closeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewToggle();
+            }
+        });
+    }
     private void playMusic() {
         try {
             //JSON Objects % arrays
