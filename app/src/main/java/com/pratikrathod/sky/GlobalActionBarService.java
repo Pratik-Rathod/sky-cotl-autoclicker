@@ -6,20 +6,20 @@ import static java.util.regex.Pattern.compile;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -28,7 +28,6 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -66,7 +65,6 @@ public class GlobalActionBarService extends AccessibilityService {
     private ImageButton closeBtn;
     private ImageButton expandBtn;
     //CustomPointWidget
-    private final PreferencesPointUtil pointUtil = new PreferencesPointUtil();
     private Intent serviceIntent;
     private static Future<?> f = null;
 
@@ -96,26 +94,26 @@ public class GlobalActionBarService extends AccessibilityService {
         configureExpand();
     }
 
-    private void configureExpand(){
-            expandBtn.setOnClickListener(v -> {
-                if(expand){
-                    closeBtn.setVisibility(View.VISIBLE);
-                    customSettings.setVisibility(View.VISIBLE);
-                    expandBtn.setImageResource(R.drawable.ic_baseline_collapse_24);
-                    expand = false;
-                }
-                else{
-                    closeBtn.setVisibility(View.GONE);
-                    customSettings.setVisibility(View.GONE);
-                    expandBtn.setImageResource(R.drawable.ic_baseline_expand_24);
-                    expand = true;
-                }
-            });
+    private void configureExpand() {
+        expandBtn.setOnClickListener(v -> {
+            int visible;
+            if (expand) {
+                visible = View.VISIBLE;
+                expandBtn.setImageResource(R.drawable.ic_baseline_collapse_24);
+                expand = false;
+            } else {
+                visible = View.GONE;
+                expandBtn.setImageResource(R.drawable.ic_baseline_expand_24);
+                expand = true;
+            }
+            closeBtn.setVisibility(visible);
+            customSettings.setVisibility(visible);
+        });
     }
 
     private WindowManager.LayoutParams[] setLayoutParams() {
-        WindowManager.LayoutParams[] layoutParams = new WindowManager.LayoutParams[3];
-        for (int i = 0; i < 3; i++) {
+        WindowManager.LayoutParams[] layoutParams = new WindowManager.LayoutParams[4];
+        for (int i = 0; i < 4; i++) {
             layoutParams[i] = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.WRAP_CONTENT,
                     WindowManager.LayoutParams.WRAP_CONTENT,
@@ -169,7 +167,7 @@ public class GlobalActionBarService extends AccessibilityService {
             });
             playButton.setOnClickListener(view -> {
                 if (CustomPointWidget.isServiceRunning) {
-                    pointUtil.savePref(getApplicationContext());
+                    PreferencesPointUtil.savePref(getApplicationContext());
                     toggleCustomService();
                     keyChords = buildGestureKeyChords();
                     Toast.makeText(getApplicationContext(), "Done", Toast.LENGTH_SHORT).show();
@@ -197,76 +195,67 @@ public class GlobalActionBarService extends AccessibilityService {
 
 
     private void configureSelectTrackButton() {
-
         //Create Dialog Box
-        AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext());
-        builder.setTitle("Select music sheet");
         String[] songs = null;
         try {
             final AssetManager assets = this.getAssets();
             songs = assets.list("musicSheet/");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
+
+        View selectTrackView= LayoutInflater.from(this).inflate(R.layout.select_track_overlay, new FrameLayout(this));
+        ListView lv = selectTrackView.findViewById(R.id.select_track_over);
+        lp[3].gravity = Gravity.CENTER;
 
         final String[] finalSongs = songs;
-        builder.setItems(songs, (dialogInterface, i) -> {
-            assert finalSongs != null;
-            musicSheetSelected = finalSongs[i];
-            Toast.makeText(getApplicationContext(), finalSongs[i] + " is selected", Toast.LENGTH_SHORT).show();
-            dialogInterface.dismiss();
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1,finalSongs);
+        lv.setAdapter(arrayAdapter);
+
+        lv.setOnItemClickListener((parent, view, position, id) -> {
+            musicSheetSelected = finalSongs[(int) id];
+            Toast.makeText(getApplicationContext(), musicSheetSelected.replace(".txt","")+" Selected", Toast.LENGTH_SHORT).show();
+            wm.removeView(selectTrackView);
         });
-
-        final AlertDialog alert = builder.create();
-
-        int LAYOUT_FLAG;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        } else {
-            LAYOUT_FLAG = WindowManager.LayoutParams.TYPE_PHONE;
-        }
-
-        Objects.requireNonNull(alert.getWindow()).setType(LAYOUT_FLAG);
 
         //selectTrack
         selectTrack.setOnClickListener(view -> {
             if (stop) {
                 pause_var = 0;
-                alert.show();
+                if(selectTrackView.getWindowToken() == null)
+                    wm.addView(selectTrackView,lp[3]);
             } else
                 Toast.makeText(getApplicationContext(), "Can't select music sheet while playing", Toast.LENGTH_SHORT).show();
         });
-
     }
 
     private void configureSettings() {
-
         customSettings.setOnClickListener(view -> {
-          if(stop)toggleCustomService();
+            if (stop) toggleCustomService();
         });
     }
 
     private void toggleCustomService() {
+        int visible;
         if (!CustomPointWidget.isServiceRunning) {
             playButton.setImageResource(R.drawable.ic_round_done_all_24);
             customSettings.setImageResource(R.drawable.ic_baseline_close_24);
-            closeBtn.setVisibility(View.GONE);
-            expandBtn.setVisibility(View.GONE);
+            visible = View.GONE;
             selectTrack.setEnabled(false);
             this.startService(serviceIntent);
         } else {
             this.stopService(serviceIntent);
-            closeBtn.setVisibility(View.VISIBLE);
-            expandBtn.setVisibility(View.VISIBLE);
+            visible = View.VISIBLE;
             playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
             customSettings.setImageResource(R.drawable.ic_baseline_settings_24);
             selectTrack.setEnabled(true);
         }
+        closeBtn.setVisibility(visible);
+        expandBtn.setVisibility(visible);
     }
 
-    private void configureClose(){
+    private void configureClose() {
         closeBtn.setOnClickListener(v -> viewToggle());
     }
+
     @SuppressWarnings("BusyWait")
     private void playMusic() {
         try {
@@ -357,7 +346,7 @@ public class GlobalActionBarService extends AccessibilityService {
         int i;
         //Default Duration for keyStroke is 100 ms
         final long DURATION = 100;
-        int[] xCordsArr = pointUtil.readPrefPoint(getApplicationContext());
+        int[] xCordsArr = PreferencesPointUtil.readPrefPoint(getApplicationContext());
 
         //Final Coordinates for Piano lol
         float[] xCords = {672, 875, 1175, 1416, 1661};
@@ -403,7 +392,12 @@ public class GlobalActionBarService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {}
+
     @Override
     public void onInterrupt() {}
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 }

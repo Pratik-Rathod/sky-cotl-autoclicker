@@ -24,8 +24,7 @@ public class CustomPointWidget extends GlobalActionBarService {
         isServiceRunning = true;
         xPoint = new int[2];
         yPoint = new int[2];
-        PreferencesPointUtil pointUtil = new PreferencesPointUtil();
-        int[] pointXY = pointUtil.readPrefPoint(getApplicationContext());
+        int[] pointXY = PreferencesPointUtil.readPrefPoint(getApplicationContext());
         //Specify the view position
         for(int i =0; i<2;i++){
             floatingView[i]= LayoutInflater.from(this).inflate(R.layout.custom_point_overlay_layout, new FrameLayout(this));

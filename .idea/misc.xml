@@ -5,6 +5,14 @@
       <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
     </configurations>
   </component>
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/layout/custom_point_overlay_layout.xml" value="0.22083333333333333" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/layout/select_track_overlay.xml" value="0.25" />
+      </map>
+    </option>
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
