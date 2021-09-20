@@ -4,12 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
+
 public class PreferencesPointUtil {
     SharedPreferences preferences = null;
+    int[] pointXY = new int[3];
 
     PreferencesPointUtil(){}
 
-    void savePref(Context context) {
+    void savePref(@NonNull Context context) {
         preferences = context.getSharedPreferences(context.getPackageName() + "sky_preferences", Activity.MODE_PRIVATE);
         SharedPreferences.Editor myEdit = preferences.edit();
         myEdit.putInt("x", CustomPointWidget.xPoint[0]);
@@ -18,8 +21,7 @@ public class PreferencesPointUtil {
         myEdit.apply();
     }
 
-    int[] readPrefPoint(Context context) {
-        int[] pointXY = new int[3];
+    int[] readPrefPoint(@NonNull Context context) {
         preferences = context.getSharedPreferences(context.getPackageName() + "sky_preferences", Activity.MODE_PRIVATE);
 
         pointXY[0] = preferences.getInt("x", 672);

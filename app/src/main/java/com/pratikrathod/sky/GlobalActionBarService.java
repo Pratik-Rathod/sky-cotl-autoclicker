@@ -1,10 +1,12 @@
 package com.pratikrathod.sky;
 
+import static java.lang.Thread.sleep;
+import static java.util.regex.Pattern.compile;
+
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Path;
@@ -32,9 +34,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.lang.Thread.sleep;
-import static java.util.regex.Pattern.compile;
 
 
 public class GlobalActionBarService extends AccessibilityService {
@@ -98,21 +97,18 @@ public class GlobalActionBarService extends AccessibilityService {
     }
 
     private void configureExpand(){
-            expandBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(expand){
-                        closeBtn.setVisibility(View.VISIBLE);
-                        customSettings.setVisibility(View.VISIBLE);
-                        expandBtn.setImageResource(R.drawable.ic_baseline_collapse_24);
-                        expand = false;
-                    }
-                    else{
-                        closeBtn.setVisibility(View.GONE);
-                        customSettings.setVisibility(View.GONE);
-                        expandBtn.setImageResource(R.drawable.ic_baseline_expand_24);
-                        expand = true;
-                    }
+            expandBtn.setOnClickListener(v -> {
+                if(expand){
+                    closeBtn.setVisibility(View.VISIBLE);
+                    customSettings.setVisibility(View.VISIBLE);
+                    expandBtn.setImageResource(R.drawable.ic_baseline_collapse_24);
+                    expand = false;
+                }
+                else{
+                    closeBtn.setVisibility(View.GONE);
+                    customSettings.setVisibility(View.GONE);
+                    expandBtn.setImageResource(R.drawable.ic_baseline_expand_24);
+                    expand = true;
                 }
             });
     }
@@ -166,37 +162,31 @@ public class GlobalActionBarService extends AccessibilityService {
     private void configurePlayButton() {
         keyChords = buildGestureKeyChords();
         try {
-            playButton.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    pause_var = 0;
-                    Toast.makeText(getApplicationContext(), "Song Reset Successfully", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
+            playButton.setOnLongClickListener(view -> {
+                pause_var = 0;
+                Toast.makeText(getApplicationContext(), "Song Reset Successfully", Toast.LENGTH_SHORT).show();
+                return true;
             });
-            playButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (CustomPointWidget.isServiceRunning) {
-                        pointUtil.savePref(getApplicationContext());
-                        toggleCustomService();
-                        keyChords = buildGestureKeyChords();
-                        Toast.makeText(getApplicationContext(), "Done", Toast.LENGTH_SHORT).show();
-                    } else {
-                        if (stop) {
-                            playButton.setImageResource(R.drawable.ic_baseline_pause_24);
-                            stop = false;
-                            if (f != null)
-                                if (f.isDone())
-                                    playMusic();
-                                else
-                                    Log.d("sky", "onClick: Thread already running");
-                            else
+            playButton.setOnClickListener(view -> {
+                if (CustomPointWidget.isServiceRunning) {
+                    pointUtil.savePref(getApplicationContext());
+                    toggleCustomService();
+                    keyChords = buildGestureKeyChords();
+                    Toast.makeText(getApplicationContext(), "Done", Toast.LENGTH_SHORT).show();
+                } else {
+                    if (stop) {
+                        playButton.setImageResource(R.drawable.ic_baseline_pause_24);
+                        stop = false;
+                        if (f != null)
+                            if (f.isDone())
                                 playMusic();
-                        } else {
-                            stop = true;
-                            playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
-                        }
+                            else
+                                Log.d("sky", "onClick: Thread already running");
+                        else
+                            playMusic();
+                    } else {
+                        stop = true;
+                        playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
                     }
                 }
             });
@@ -220,14 +210,11 @@ public class GlobalActionBarService extends AccessibilityService {
         }
 
         final String[] finalSongs = songs;
-        builder.setItems(songs, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                assert finalSongs != null;
-                musicSheetSelected = finalSongs[i];
-                Toast.makeText(getApplicationContext(), finalSongs[i] + " is selected", Toast.LENGTH_SHORT).show();
-                dialogInterface.dismiss();
-            }
+        builder.setItems(songs, (dialogInterface, i) -> {
+            assert finalSongs != null;
+            musicSheetSelected = finalSongs[i];
+            Toast.makeText(getApplicationContext(), finalSongs[i] + " is selected", Toast.LENGTH_SHORT).show();
+            dialogInterface.dismiss();
         });
 
         final AlertDialog alert = builder.create();
@@ -242,26 +229,20 @@ public class GlobalActionBarService extends AccessibilityService {
         Objects.requireNonNull(alert.getWindow()).setType(LAYOUT_FLAG);
 
         //selectTrack
-        selectTrack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (stop) {
-                    pause_var = 0;
-                    alert.show();
-                } else
-                    Toast.makeText(getApplicationContext(), "Can't select music sheet while playing", Toast.LENGTH_SHORT).show();
-            }
+        selectTrack.setOnClickListener(view -> {
+            if (stop) {
+                pause_var = 0;
+                alert.show();
+            } else
+                Toast.makeText(getApplicationContext(), "Can't select music sheet while playing", Toast.LENGTH_SHORT).show();
         });
 
     }
 
     private void configureSettings() {
 
-        customSettings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-              if(stop)toggleCustomService();
-            }
+        customSettings.setOnClickListener(view -> {
+          if(stop)toggleCustomService();
         });
     }
 
@@ -284,13 +265,9 @@ public class GlobalActionBarService extends AccessibilityService {
     }
 
     private void configureClose(){
-        closeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewToggle();
-            }
-        });
+        closeBtn.setOnClickListener(v -> viewToggle());
     }
+    @SuppressWarnings("BusyWait")
     private void playMusic() {
         try {
             //JSON Objects % arrays
@@ -305,52 +282,48 @@ public class GlobalActionBarService extends AccessibilityService {
             final int[] currentMusicTime = new int[1];
             playButton = mLayout.findViewById(R.id.play);
 
-            Runnable mRunnable = new Runnable() {
-                @SuppressWarnings("BusyWait")
-                @Override
-                public void run() {
-                    for (int i = pause_var; i < musicSheetArray.length(); i++) {
-                        if (stop) {
-                            pause_var = i;
-                            break;
-                        }
-                        try {
-                            keys = musicSheetArray.getJSONObject(i);
-                            keyIndexString = keys.getString("key");
-
-                            if (i + 1 < musicSheetArray.length()) {
-                                nextMusicTime[0] = musicSheetArray.getJSONObject(i + 1).getInt("time");
-                                currentMusicTime[0] = keys.getInt("time");
-                                findGap = nextMusicTime[0] - currentMusicTime[0];
-                            }
-
-                            m = p.matcher(keyIndexString);
-                            if (m.find())
-                                s = m.group();
-                            keyIndex = Integer.parseInt(s);
-
-                            dispatchGesture(keyChords[keyIndex], null, null);
-
-                            if (i + 1 < musicSheetArray.length()) {
-                                if (findGap > ms) {
-                                    sleep(findGap);
-                                } else if (currentMusicTime[0] == nextMusicTime[0]) {
-                                    sleep(20);
-                                } else {
-                                    sleep(ms);
-                                }
-                            } else {
-                                playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
-                                stop = true;
-                                pause_var = 0;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+            Runnable mRunnable = () -> {
+                for (int i = pause_var; i < musicSheetArray.length(); i++) {
+                    if (stop) {
+                        pause_var = i;
+                        break;
                     }
-                    if (!stop)
-                        pause_var = 0;
+                    try {
+                        keys = musicSheetArray.getJSONObject(i);
+                        keyIndexString = keys.getString("key");
+
+                        if (i + 1 < musicSheetArray.length()) {
+                            nextMusicTime[0] = musicSheetArray.getJSONObject(i + 1).getInt("time");
+                            currentMusicTime[0] = keys.getInt("time");
+                            findGap = nextMusicTime[0] - currentMusicTime[0];
+                        }
+
+                        m = p.matcher(keyIndexString);
+                        if (m.find())
+                            s = m.group();
+                        keyIndex = Integer.parseInt(s);
+
+                        dispatchGesture(keyChords[keyIndex], null, null);
+
+                        if (i + 1 < musicSheetArray.length()) {
+                            if (findGap > ms) {
+                                sleep(findGap);
+                            } else if (currentMusicTime[0] == nextMusicTime[0]) {
+                                sleep(20);
+                            } else {
+                                sleep(ms);
+                            }
+                        } else {
+                            playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
+                            stop = true;
+                            pause_var = 0;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
+                if (!stop)
+                    pause_var = 0;
             };
             ExecutorService executorService = Executors.newFixedThreadPool(1);
             f = executorService.submit(mRunnable);
