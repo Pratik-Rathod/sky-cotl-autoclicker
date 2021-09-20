@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 public class QuickPlayTile extends TileService {
 
+    boolean access = false;
     @Override
     public void onTileAdded() {
         Log.d("tag", "OnTitle Added");
@@ -22,8 +23,13 @@ public class QuickPlayTile extends TileService {
 
     @Override
     public void onStartListening() {
+        access = MainActivity.isAccessibilityServiceEnabled(getApplicationContext(), GlobalActionBarService.class);
         Tile tile = getQsTile();
-        tile.setState(GlobalActionBarService.TILE_STATE);
+        if(access){
+            tile.setState(GlobalActionBarService.TILE_STATE);
+        }else{
+            tile.setState(Tile.STATE_INACTIVE);
+        }
         tile.updateTile();
         super.onStartListening();
         Log.d("tag", "TIle Listening");
@@ -39,7 +45,7 @@ public class QuickPlayTile extends TileService {
     public void onClick() {
         super.onClick();
         Tile tile = getQsTile();
-        if (MainActivity.isAccessibilityServiceEnabled(getApplicationContext(), GlobalActionBarService.class)) {
+        if (access) {
             tile.setState(GlobalActionBarService.viewToggle());
             if(CustomPointWidget.isServiceRunning)
                 stopService(new Intent(this,CustomPointWidget.class));
