@@ -6,4 +6,5 @@
     <string name="requestTurnString">All Done ! turn on above switch to enjoy.</string>
     <string name="QuickTileLabel">Sky Player</string>
     <string name="contentDescription">Accessibility buttons</string>
+    <string name="select_music_sheet">Select music sheet</string>
 </resources>

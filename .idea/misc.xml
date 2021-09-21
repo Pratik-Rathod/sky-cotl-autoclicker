@@ -8,8 +8,20 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_baseline_audio_track_24.xml" value="0.15034722222222222" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_baseline_close_24.xml" value="0.15034722222222222" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_baseline_collapse_24.xml" value="0.15034722222222222" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_baseline_expand_24.xml" value="0.15034722222222222" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_baseline_pause_24.xml" value="0.15034722222222222" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_baseline_play_arrow_24.xml" value="0.15034722222222222" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_baseline_settings_24.xml" value="0.15034722222222222" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_baseline_terrain_24.xml" value="0.15034722222222222" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_baseline_trip_origin_24.xml" value="0.15034722222222222" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_round_done_all_24.xml" value="0.15034722222222222" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_two_tone_circle_24.xml" value="0.15034722222222222" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/drawable/ic_twotone_add_circle_24.xml" value="0.15034722222222222" />
         <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/layout/custom_point_overlay_layout.xml" value="0.22083333333333333" />
-        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/layout/select_track_overlay.xml" value="0.25" />
+        <entry key="..\:/Users/Pratik/StudioProjects/sky-cotl-autoclicker/app/src/main/res/layout/select_track_overlay.xml" value="0.22" />
       </map>
     </option>
   </component>

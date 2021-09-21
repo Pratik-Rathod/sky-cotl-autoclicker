@@ -8,19 +8,28 @@ import android.accessibilityservice.GestureDescription;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,7 +76,7 @@ public class GlobalActionBarService extends AccessibilityService {
     //CustomPointWidget
     private Intent serviceIntent;
     private static Future<?> f = null;
-
+    FrameLayout selectTrackView = null;
     @Override
     protected void onServiceConnected() {
         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
@@ -92,7 +101,9 @@ public class GlobalActionBarService extends AccessibilityService {
         configureSettings();
         configureClose();
         configureExpand();
+
     }
+
 
     private void configureExpand() {
         expandBtn.setOnClickListener(v -> {
@@ -197,22 +208,54 @@ public class GlobalActionBarService extends AccessibilityService {
     private void configureSelectTrackButton() {
         //Create Dialog Box
         String[] songs = null;
+        lp[3].gravity = Gravity.CENTER;
+        lp[3].flags = 0;
+
         try {
             final AssetManager assets = this.getAssets();
             songs = assets.list("musicSheet/");
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        View selectTrackView= LayoutInflater.from(this).inflate(R.layout.select_track_overlay, new FrameLayout(this));
+        selectTrackView = new FrameLayout(this){
+            @Override
+            public boolean dispatchKeyEvent(KeyEvent event) {
+                if(event.getKeyCode() == KeyEvent.KEYCODE_BACK || event.getKeyCode() == KeyEvent.KEYCODE_POWER)
+                {
+                    if(this.getWindowToken() != null)
+                        wm.removeView(this);
+                }
+                return super.dispatchKeyEvent(event);
+            }
+        };
+
+        LayoutInflater.from(this).inflate(R.layout.select_track_overlay, selectTrackView);
         ListView lv = selectTrackView.findViewById(R.id.select_track_over);
-        lp[3].gravity = Gravity.CENTER;
+
 
         final String[] finalSongs = songs;
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1,finalSongs);
+        String[] adapterSongs =new String[finalSongs.length];
+
+        for(int i=0;i<finalSongs.length;i++)
+            adapterSongs[i] =songs[i].substring(0,songs[i].lastIndexOf(".") );
+
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, adapterSongs){
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView view1 = view.findViewById(android.R.id.text1);
+                view1.setTextColor(Color.WHITE);
+                return view;
+            }
+        };
+
         lv.setAdapter(arrayAdapter);
 
         lv.setOnItemClickListener((parent, view, position, id) -> {
             musicSheetSelected = finalSongs[(int) id];
-            Toast.makeText(getApplicationContext(), musicSheetSelected.replace(".txt","")+" Selected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "\""+adapterSongs[(int)id]+ "\" is selected", Toast.LENGTH_SHORT).show();
             wm.removeView(selectTrackView);
         });
 
@@ -220,8 +263,18 @@ public class GlobalActionBarService extends AccessibilityService {
         selectTrack.setOnClickListener(view -> {
             if (stop) {
                 pause_var = 0;
-                if(selectTrackView.getWindowToken() == null)
-                    wm.addView(selectTrackView,lp[3]);
+                if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    if (selectTrackView.getWindowToken() == null){
+                        DisplayMetrics dm =getApplicationContext().getResources().getDisplayMetrics();
+                        lp[3].width = (dm.widthPixels * 80)/100;
+                        lp[3].height = (dm.heightPixels * 90)/100;
+                        wm.addView(selectTrackView, lp[3]);
+                    }
+                    else
+                        wm.removeView(selectTrackView);
+                }else{
+                    Toast.makeText(this, "Can't use select track overlay in portrait mode" , Toast.LENGTH_SHORT).show();
+                }
             } else
                 Toast.makeText(getApplicationContext(), "Can't select music sheet while playing", Toast.LENGTH_SHORT).show();
         });
@@ -391,10 +444,22 @@ public class GlobalActionBarService extends AccessibilityService {
     }
 
     @Override
-    public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {}
+    public void onAccessibilityEvent(AccessibilityEvent accessibilityEvent) {
+    }
 
     @Override
-    public void onInterrupt() {}
+    public void onInterrupt() {
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            if (selectTrackView.getWindowToken() != null)
+                wm.removeView(selectTrackView);
+        }
+
+    }
 
     @Override
     public void onDestroy() {
