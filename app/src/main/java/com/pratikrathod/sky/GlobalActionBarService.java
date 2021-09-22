@@ -24,6 +24,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,6 +78,7 @@ public class GlobalActionBarService extends AccessibilityService {
     private Intent serviceIntent;
     private static Future<?> f = null;
     FrameLayout selectTrackView = null;
+
     @Override
     protected void onServiceConnected() {
         wm = (WindowManager) getSystemService(WINDOW_SERVICE);
@@ -103,7 +105,6 @@ public class GlobalActionBarService extends AccessibilityService {
         configureExpand();
 
     }
-
 
     private void configureExpand() {
         expandBtn.setOnClickListener(v -> {
@@ -218,12 +219,11 @@ public class GlobalActionBarService extends AccessibilityService {
             e.printStackTrace();
         }
 
-        selectTrackView = new FrameLayout(this){
+        selectTrackView = new FrameLayout(this) {
             @Override
             public boolean dispatchKeyEvent(KeyEvent event) {
-                if(event.getKeyCode() == KeyEvent.KEYCODE_BACK || event.getKeyCode() == KeyEvent.KEYCODE_POWER)
-                {
-                    if(this.getWindowToken() != null)
+                if (event.getKeyCode() == KeyEvent.KEYCODE_BACK || event.getKeyCode() == KeyEvent.KEYCODE_POWER) {
+                    if (this.getWindowToken() != null)
                         wm.removeView(this);
                 }
                 return super.dispatchKeyEvent(event);
@@ -232,15 +232,18 @@ public class GlobalActionBarService extends AccessibilityService {
 
         LayoutInflater.from(this).inflate(R.layout.select_track_overlay, selectTrackView);
         ListView lv = selectTrackView.findViewById(R.id.select_track_over);
+        ImageView closeView = selectTrackView.findViewById(R.id.close_select_dialog_box);
 
+        //close dialog box
+        closeView.setOnClickListener(v -> wm.removeView(selectTrackView));
 
         final String[] finalSongs = songs;
-        String[] adapterSongs =new String[finalSongs.length];
+        String[] adapterSongs = new String[finalSongs.length];
 
-        for(int i=0;i<finalSongs.length;i++)
-            adapterSongs[i] =songs[i].substring(0,songs[i].lastIndexOf(".") );
+        for (int i = 0; i < finalSongs.length; i++)
+            adapterSongs[i] = songs[i].substring(0, songs[i].lastIndexOf("."));
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, adapterSongs){
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, adapterSongs) {
             @NonNull
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -255,7 +258,7 @@ public class GlobalActionBarService extends AccessibilityService {
 
         lv.setOnItemClickListener((parent, view, position, id) -> {
             musicSheetSelected = finalSongs[(int) id];
-            Toast.makeText(getApplicationContext(), "\""+adapterSongs[(int)id]+ "\" is selected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "\"" + adapterSongs[(int) id] + "\" is selected", Toast.LENGTH_SHORT).show();
             wm.removeView(selectTrackView);
         });
 
@@ -264,16 +267,15 @@ public class GlobalActionBarService extends AccessibilityService {
             if (stop) {
                 pause_var = 0;
                 if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    if (selectTrackView.getWindowToken() == null){
-                        DisplayMetrics dm =getApplicationContext().getResources().getDisplayMetrics();
-                        lp[3].width = (dm.widthPixels * 80)/100;
-                        lp[3].height = (dm.heightPixels * 90)/100;
+                    if (selectTrackView.getWindowToken() == null) {
+                        DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
+                        lp[3].width = (dm.widthPixels * 80) / 100;
+                        lp[3].height = (dm.heightPixels * 90) / 100;
                         wm.addView(selectTrackView, lp[3]);
-                    }
-                    else
+                    } else
                         wm.removeView(selectTrackView);
-                }else{
-                    Toast.makeText(this, "Can't use select track overlay in portrait mode" , Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Can't use select track overlay in portrait mode", Toast.LENGTH_SHORT).show();
                 }
             } else
                 Toast.makeText(getApplicationContext(), "Can't select music sheet while playing", Toast.LENGTH_SHORT).show();
@@ -458,9 +460,7 @@ public class GlobalActionBarService extends AccessibilityService {
             if (selectTrackView.getWindowToken() != null)
                 wm.removeView(selectTrackView);
         }
-
     }
-
     @Override
     public void onDestroy() {
         super.onDestroy();

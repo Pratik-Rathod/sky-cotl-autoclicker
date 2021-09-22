@@ -1,27 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_centerInParent="true"
-    android:focusable="true"
-    android:layout_marginStart="30dp"
-    android:layout_marginEnd="30dp"
-    android:layout_marginTop="10dp"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:orientation="vertical"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:layout_marginStart="30dp"
+    android:layout_marginTop="10dp"
+    android:layout_marginEnd="30dp"
     android:background="@color/buttonBackground"
-    android:layout_height="wrap_content">
-    <TextView
-        android:background="@color/buttonBackground"
-        android:padding="8dp"
-        android:textStyle="bold"
-        android:textColor="@color/colorPrimaryDark"
-        android:text="@string/select_music_sheet"
-        android:textSize="20sp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+    android:focusable="true"
+    android:orientation="vertical">
+    <RelativeLayout
+        android:id="@+id/select_music_text_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/select_music_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/buttonBackground"
+            android:padding="8dp"
+            android:text="@string/select_music_sheet"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+        <ImageView
+            android:layout_marginEnd="10dp"
+            android:id="@+id/close_select_dialog_box"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/select_music_text"
+            android:layout_centerInParent="true"
+            android:contentDescription="@string/contentDescription"
+            android:src="@drawable/ic_baseline_close_24" />
+    </RelativeLayout>
+
     <ListView
-        android:textAlignment="center"
-        android:foregroundTint="@color/buttonColor"
         android:id="@+id/select_track_over"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/select_music_text_layout"
+        android:foregroundTint="@color/buttonColor"
+        android:textAlignment="center" />
+</RelativeLayout>
