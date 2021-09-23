@@ -7,7 +7,6 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.GestureDescription;
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Path;
@@ -36,8 +35,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -78,6 +75,7 @@ public class GlobalActionBarService extends AccessibilityService {
     private Intent serviceIntent;
     private static Future<?> f = null;
     FrameLayout selectTrackView = null;
+    String[] songs = null;
 
     @Override
     protected void onServiceConnected() {
@@ -85,7 +83,8 @@ public class GlobalActionBarService extends AccessibilityService {
         serviceIntent = new Intent(getApplicationContext(), CustomPointWidget.class);
         mLayout = new FrameLayout(this);
         lp = setLayoutParams();
-
+        StorageUtil storageUtil = new StorageUtil(this);
+        storageUtil.makePrimaryFile();
         lp[0].gravity = Gravity.START;
         lp[0].flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         LayoutInflater.from(this).inflate(R.layout.action_bar, mLayout);
@@ -151,7 +150,6 @@ public class GlobalActionBarService extends AccessibilityService {
             } else {
                 stop = true;
                 pause_var = 0;
-
                 playButton.setImageResource(R.drawable.ic_baseline_play_arrow_24);
                 customSettings.setImageResource(R.drawable.ic_baseline_settings_24);
                 expandBtn.setImageResource(R.drawable.ic_baseline_expand_24);
@@ -201,28 +199,26 @@ public class GlobalActionBarService extends AccessibilityService {
                 }
             });
         } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "WTF" + e.toString(), Toast.LENGTH_LONG).show();
         }
     }
 
+    private void setSheetList() {
+        StorageUtil util = new StorageUtil(getApplicationContext());
+        songs = util.listOfMusicSheets();
+    }
 
     private void configureSelectTrackButton() {
-        //Create Dialog Box
-        String[] songs = null;
+        //Create Dialog Box flags
         lp[3].gravity = Gravity.CENTER;
         lp[3].flags = 0;
 
-        try {
-            final AssetManager assets = this.getAssets();
-            songs = assets.list("musicSheet/");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        setSheetList();
 
         selectTrackView = new FrameLayout(this) {
             @Override
             public boolean dispatchKeyEvent(KeyEvent event) {
-                if (event.getKeyCode() == KeyEvent.KEYCODE_BACK || event.getKeyCode() == KeyEvent.KEYCODE_POWER) {
+                if (event.getKeyCode() == KeyEvent.KEYCODE_BACK || event.getKeyCode() == KeyEvent.KEYCODE_POWER || event.getKeyCode() == KeyEvent.KEYCODE_HOME || event.getKeyCode() == KeyEvent.KEYCODE_MOVE_HOME) {
                     if (this.getWindowToken() != null)
                         wm.removeView(this);
                 }
@@ -234,8 +230,7 @@ public class GlobalActionBarService extends AccessibilityService {
         ListView lv = selectTrackView.findViewById(R.id.select_track_over);
         ImageView closeView = selectTrackView.findViewById(R.id.close_select_dialog_box);
 
-        //close dialog box
-        closeView.setOnClickListener(v -> wm.removeView(selectTrackView));
+
 
         final String[] finalSongs = songs;
         String[] adapterSongs = new String[finalSongs.length];
@@ -262,6 +257,9 @@ public class GlobalActionBarService extends AccessibilityService {
             wm.removeView(selectTrackView);
         });
 
+        //close dialog box
+        closeView.setOnClickListener(v -> wm.removeView(selectTrackView));
+
         //selectTrack
         selectTrack.setOnClickListener(view -> {
             if (stop) {
@@ -271,6 +269,7 @@ public class GlobalActionBarService extends AccessibilityService {
                         DisplayMetrics dm = getApplicationContext().getResources().getDisplayMetrics();
                         lp[3].width = (dm.widthPixels * 80) / 100;
                         lp[3].height = (dm.heightPixels * 90) / 100;
+                        setSheetList();
                         wm.addView(selectTrackView, lp[3]);
                     } else
                         wm.removeView(selectTrackView);
@@ -313,9 +312,10 @@ public class GlobalActionBarService extends AccessibilityService {
 
     @SuppressWarnings("BusyWait")
     private void playMusic() {
+        StorageUtil util = new StorageUtil(getApplicationContext());
         try {
             //JSON Objects % arrays
-            JSONArray array = new JSONArray(LoadMusicSheet());
+            JSONArray array = util.LoadMusicSheet(musicSheetSelected);
             JSONObject object = array.getJSONObject(0);
             int bpm = Integer.parseInt(object.getString("bpm"));
             ms = 60000 / bpm;
@@ -375,25 +375,6 @@ public class GlobalActionBarService extends AccessibilityService {
             e.printStackTrace();
         }
     }
-
-    private String LoadMusicSheet() {
-        String json;
-        try {
-            InputStream in = this.getAssets().open("musicSheet/" + musicSheetSelected);
-            int size = in.available();
-            byte[] buffer = new byte[size];
-            //noinspection ResultOfMethodCallIgnored
-            in.read(buffer);
-            in.close();
-            json = new String(buffer, StandardCharsets.UTF_8);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-        return json;
-    }
-
 
     //Map Coordinates into keyChords & build the gesture
     private GestureDescription[] buildGestureKeyChords() {
@@ -460,9 +441,5 @@ public class GlobalActionBarService extends AccessibilityService {
             if (selectTrackView.getWindowToken() != null)
                 wm.removeView(selectTrackView);
         }
-    }
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 }
